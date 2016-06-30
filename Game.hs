@@ -2,7 +2,7 @@ module Game where
 
 data Tile = Val Int | Empty deriving (Show, Eq)
 
-data Move = L | R | U | D deriving Show
+data Move = L | R | U | D deriving (Show, Eq)
 
 nthCol :: [[Tile]] -> Int -> [Tile]
 nthCol board col = map (!! col) board
@@ -37,11 +37,11 @@ applyMove U = rot . rot . rot . slideRight . rot
 canMove :: Move -> [[Tile]] -> Bool
 canMove move board = applyMove move board /= board
 
+possibleMoves :: [[Tile]] -> [Move]
+possibleMoves board = filter (\m -> canMove m board) [L, R, U, D]
+
 gameOver :: [[Tile]] -> Bool
-gameOver board = not (canMove L board ||
-                      canMove R board ||
-                      canMove U board ||
-                      canMove D board)
+gameOver board = possibleMoves board == []
 
 victory :: [[Tile]] -> Bool
 victory [] = False
@@ -61,6 +61,3 @@ setTile ((t : ts) : rs) 0 0 v = ((Val v) : ts) : rs
 setTile ((t : ts) : rs) 0 c v = let (r : _) = setTile [ts] 0 (c - 1) v in
                                 (t : r) : rs
 setTile (ts : rs) r c v = ts : setTile rs (r - 1) c v
-
-possibleMoves :: [[Tile]] -> [Move]
-possibleMoves board = filter (\m -> canMove m board) [L, R, U, D]
