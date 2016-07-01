@@ -42,5 +42,13 @@ bestNextScore m board =
   let nextMove  = maxMoveBy moveScore nextBoard in
   score (applyMove nextMove nextBoard)
 
+worstRandomTile :: Move -> [[Tile]] -> Int
+worstRandomTile m board =
+  let nextBoard = applyMove m board in
+  let empties = emptyTiles nextBoard 0 0 in
+  let s = \(r, c) v -> score (setTile nextBoard r c v) in
+  let (r, c) = maximumBy (\t1 t2 -> compare (s t1 2) (s t2 2)) empties in
+  score (setTile nextBoard r c 2)
+
 getNextMove :: [[Tile]] -> Move
 getNextMove board = maxMoveBy moveScore board
