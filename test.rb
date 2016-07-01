@@ -1,4 +1,4 @@
-RUNS = 1000
+RUNS = (ENV["RUNS"] || 1000).to_i
 
 turns  = []
 scores = []
