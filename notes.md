@@ -18,6 +18,6 @@
 
 ## Tile Difference Algo
 
-    AVG. TURNS: 427
-    AVG. SCORE: 945
-    WINS:       4
+    AVG. TURNS: 446
+    AVG. SCORE: 987
+    WINS:       7
