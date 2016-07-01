@@ -36,6 +36,15 @@ score board = sum (map (\r -> rowScore (board !! r) r) [0..3])
 moveScore :: Move -> [[Tile]] -> Int
 moveScore m board = score (applyMove m board)
 
+mirror :: [[Tile]] -> [[Tile]]
+mirror board = map (nthCol board) [0..3]
+
+moveScoreWithMirror:: Move -> [[Tile]] -> Int
+moveScoreWithMirror m board =
+  let newBoard = applyMove m board in
+  let mirrored = mirror newBoard in
+  score newBoard + score mirrored
+
 bestNextScore :: Move -> [[Tile]] -> Int
 bestNextScore m board =
   let nextBoard = applyMove m board in
