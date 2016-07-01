@@ -27,11 +27,12 @@ tilePairScore (Val n, Empty) = n * (-1)
 tilePairScore (Val n, Val m) = let diff = m - n in
                                if diff < 0 then diff * 5 else diff
 
-rowScore :: [Tile] -> Int -> Int
-rowScore ts r = sum (map tilePairScore (tilePairs ts)) * (r + 1)
+rowScore :: [Tile] -> Int
+-- rowScore ts r = sum (map tilePairScore (tilePairs ts)) * (r + 1)
+rowScore ts = sum (map (\t -> (tileScore t) ^ 2) ts)
 
 score :: [[Tile]] -> Int
-score board = sum (map (\r -> rowScore (board !! r) r) [0..3])
+score board = sum (map rowScore board)
 
 moveScore :: Move -> [[Tile]] -> Int
 moveScore m board = score (applyMove m board)
@@ -49,7 +50,9 @@ bestNextScore :: Move -> [[Tile]] -> Int
 bestNextScore m board =
   let nextBoard = applyMove m board in
   let nextMove  = maxMoveBy moveScore nextBoard in
-  score (applyMove nextMove nextBoard)
+  let nextNextBoard = applyMove m nextBoard in
+  let nextNextMove  = maxMoveBy moveScore nextNextBoard in
+  score (applyMove nextNextMove nextBoard)
 
 worstRandomTile :: Move -> [[Tile]] -> Int
 worstRandomTile m board =
@@ -60,4 +63,4 @@ worstRandomTile m board =
   score (setTile nextBoard r c 2)
 
 getNextMove :: [[Tile]] -> Move
-getNextMove board = maxMoveBy moveScore board
+getNextMove board = maxMoveBy bestNextScore board
