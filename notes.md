@@ -21,3 +21,9 @@
     AVG. TURNS: 446
     AVG. SCORE: 987
     WINS:       7
+
+## Sum Cubes w/ Lookahead
+
+    AVG. TURNS: 456
+    AVG. SCORE: 1008
+    WINS:       0
