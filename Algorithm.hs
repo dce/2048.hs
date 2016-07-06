@@ -52,13 +52,24 @@ bestNextScore m board =
   let nextMove  = maxMoveBy moveScore nextBoard in
   score (applyMove nextMove nextBoard)
 
-worstRandomTile :: Move -> [[Tile]] -> Int
-worstRandomTile m board =
-  let nextBoard = applyMove m board in
-  let empties = emptyTiles nextBoard 0 0 in
-  let s = \(r, c) v -> score (setTile nextBoard r c v) in
-  let (r, c) = maximumBy (\t1 t2 -> compare (s t1 2) (s t2 2)) empties in
-  score (setTile nextBoard r c 2)
+vectorize :: [[Tile]] -> [Tile]
+vectorize (r1 : r2 : r3 : r4 : []) = (reverse r1) ++ r2 ++ (reverse r3) ++ r4
+
+isIncrease :: (Tile, Tile) -> Bool
+isIncrease (Empty, Empty) = False
+isIncrease (Empty, _) = True
+isIncrease (_, Empty) = False
+isIncrease (Val m, Val n) = n > m
+
+tilesIncreased :: Move -> [[Tile]] -> [Int]
+tilesIncreased m board =
+  let vector = vectorize board in
+  let nextVector = vectorize (applyMove m board) in
+  let pairs = zip vector nextVector in
+  filter (\ i -> isIncrease (pairs !! i)) [0..15]
+
+maxTileIncreased :: Move -> [[Tile]] -> Int
+maxTileIncreased m board = head (reverse (tilesIncreased m board))
 
 getNextMove :: [[Tile]] -> Move
-getNextMove board = maxMoveBy bestNextScore board
+getNextMove board = maxMoveBy maxTileIncreased board
