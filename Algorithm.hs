@@ -8,43 +8,50 @@ maxMoveBy f board =
   let comparison = (\m1 m2 -> compare (f m1 board) (f m2 board)) in
   maximumBy comparison (possibleMoves board)
 
-tileScore :: Tile -> Int
-tileScore Empty = 0
-tileScore (Val n) = n
+tileToInt :: Tile -> Int
+tileToInt Empty = 0
+tileToInt (Val n) = n
 
-tilePairs :: [Tile] -> [(Tile, Tile)]
-tilePairs [] = []
-tilePairs [t] = []
-tilePairs (t1 : t2 : ts) = (t1, t2) : tilePairs (t2 : ts)
+horizontalNeighbors :: [[Tile]] -> Int -> Int -> [Tile]
+horizontalNeighbors board r 0 = [ board !! r !! 1 ]
+horizontalNeighbors board r 3 = [ board !! r !! 2 ]
+horizontalNeighbors board r c = [ board !! r !! (c - 1) , board !! r !! (c + 1) ]
 
-tilePairScore :: (Tile, Tile) -> Int
--- tilePairScore (t1, t2) =
---   let diff = tileScore t2 - tileScore t1 in
---   if diff < 0 then diff * 5 else diff
-tilePairScore (Empty, Empty) = 0
-tilePairScore (Empty, Val n) = n
-tilePairScore (Val n, Empty) = n * (-1)
-tilePairScore (Val n, Val m) = let diff = m - n in
-                               if diff < 0 then diff * 5 else diff
+verticalNeighbors :: [[Tile]] -> Int -> Int -> [Tile]
+verticalNeighbors board 0 c = [ board !! 1 !! c ]
+verticalNeighbors board 3 c = [ board !! 2 !! c ]
+verticalNeighbors board r c = [ board !! (r - 1) !! c , board !! (r + 1) !! c ]
 
-rowScore :: [Tile] -> Int
--- rowScore ts r = sum (map tilePairScore (tilePairs ts)) * (r + 1)
-rowScore ts = sum (map (\t -> (tileScore t) ^ 3) ts)
+neighbors :: [[Tile]] -> Int -> Int -> [Tile]
+neighbors board r c = (horizontalNeighbors board r c) ++ (verticalNeighbors board r c)
+
+logBase2 :: Int -> Int
+logBase2 2 = 0
+logBase2 n = 1 + logBase2 (n `div` 2)
+
+adjustedScore :: Tile -> Tile -> Int
+adjustedScore Empty _ = 0
+adjustedScore _ Empty = 0
+adjustedScore t1 t2 =
+  let v1 = fromIntegral (tileToInt t1) in
+  let v2 = fromIntegral (tileToInt t2) in
+  let distance = abs ((logBase2 v1) - (logBase2 v2)) + 1 in
+  v2 `div` distance
+
+tileScore :: [[Tile]] -> Int -> Int -> Int
+tileScore board r c =
+  let tile = board !! r !! c in
+  let base = tileToInt tile ^ 3 in
+  let ns = neighbors board r c in
+  base + sum (map (\n -> adjustedScore tile n) ns)
 
 score :: [[Tile]] -> Int
-score board = sum (map rowScore board)
+score board =
+  let tiles = [ (x, y) | x <- [0..3], y <- [0..3] ] in
+  sum (map (\ (r, c) -> tileScore board r c) tiles)
 
 moveScore :: Move -> [[Tile]] -> Int
 moveScore m board = score (applyMove m board)
-
-mirror :: [[Tile]] -> [[Tile]]
-mirror board = map (nthCol board) [0..3]
-
-moveScoreWithMirror:: Move -> [[Tile]] -> Int
-moveScoreWithMirror m board =
-  let newBoard = applyMove m board in
-  let mirrored = mirror newBoard in
-  score newBoard + score mirrored
 
 bestNextScore :: Move -> [[Tile]] -> Int
 bestNextScore m board =
@@ -52,24 +59,5 @@ bestNextScore m board =
   let nextMove  = maxMoveBy moveScore nextBoard in
   score (applyMove nextMove nextBoard)
 
-vectorize :: [[Tile]] -> [Tile]
-vectorize (r1 : r2 : r3 : r4 : []) = (reverse r1) ++ r2 ++ (reverse r3) ++ r4
-
-isIncrease :: (Tile, Tile) -> Bool
-isIncrease (Empty, Empty) = False
-isIncrease (Empty, _) = True
-isIncrease (_, Empty) = False
-isIncrease (Val m, Val n) = n > m
-
-tilesIncreased :: Move -> [[Tile]] -> [Int]
-tilesIncreased m board =
-  let vector = vectorize board in
-  let nextVector = vectorize (applyMove m board) in
-  let pairs = zip vector nextVector in
-  filter (\ i -> isIncrease (pairs !! i)) [0..15]
-
-maxTileIncreased :: Move -> [[Tile]] -> Int
-maxTileIncreased m board = head (reverse (tilesIncreased m board))
-
 getNextMove :: [[Tile]] -> Move
-getNextMove board = maxMoveBy maxTileIncreased board
+getNextMove board = maxMoveBy bestNextScore board
