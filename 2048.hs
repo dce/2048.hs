@@ -2,7 +2,7 @@ import Game
 import Algorithm
 import System.Random
 
-addRandomTile :: [[Tile]] -> IO [[Tile]]
+addRandomTile :: Board -> IO Board
 addRandomTile board = do
   let empties = emptyTiles board 0 0
   idx <- randomRIO (0, (length empties - 1))
@@ -11,7 +11,7 @@ addRandomTile board = do
   let v = if rv == 10 then 4 else 2
   return (setTile board r c v)
 
-iter :: [[Tile]] -> IO ()
+iter :: Board -> IO ()
 iter board = do
   putStrLn (show board)
   newState <- addRandomTile (applyMove (getNextMove board) board)
