@@ -12,7 +12,7 @@ tileScore :: Tile -> Int
 tileScore Empty = 0
 tileScore (Val n) = n
 
-tilePairs :: [Tile] -> [(Tile, Tile)]
+tilePairs :: Row -> [(Tile, Tile)]
 tilePairs [] = []
 tilePairs [t] = []
 tilePairs (t1 : t2 : ts) = (t1, t2) : tilePairs (t2 : ts)
@@ -22,11 +22,13 @@ tilePairScore (t1, t2) =
   let diff = tileScore t2 - tileScore t1 in
   if diff < 0 then diff * 5 else diff
 
-rowScore :: [Tile] -> Int -> Int
+rowScore :: Row -> Int -> Int
 rowScore ts r = sum (map tilePairScore (tilePairs ts)) * (r + 1)
 
 score :: Board -> Int
-score board = sum (map (\r -> rowScore (board !! r) r) [0..3])
+score board =
+  let rowScores = map (\r -> rowScore (board !! r) r) [0..3] in
+  sum rowScores
 
 moveScore :: Move -> Board -> Int
 moveScore m board = score (applyMove m board)
