@@ -5,6 +5,7 @@ This is a Haskell program to create an AI player for [2048][1]. Your algorithm s
 [1]: https://gabrielecirulli.github.io/2048/
 
 ```
+brew install ghc
 make
 ./2048
 ```
