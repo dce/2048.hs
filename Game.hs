@@ -34,9 +34,9 @@ slideRight = map (reverse . combineMatches . reverse . slideAcrossEmpties)
 
 applyMove :: Move -> Board -> Board
 applyMove R = slideRight
-applyMove D = rot . slideRight . rot . rot . rot
+applyMove U = rot . slideRight . rot . rot . rot
 applyMove L = rot . rot . slideRight . rot . rot
-applyMove U = rot . rot . rot . slideRight . rot
+applyMove D = rot . rot . rot . slideRight . rot
 
 canMove :: Move -> Board -> Bool
 canMove move board = applyMove move board /= board
