@@ -23,11 +23,11 @@ tilePairScore (t1, t2) =
   if diff < 0 then diff * 5 else diff
 
 rowScore :: (Row, Int) -> Int
-rowScore (row, idx) = sum (map tilePairScore (tilePairs row)) * (idx + 1)
+rowScore (row, idx) = sum (map tilePairScore (tilePairs row)) * idx
 
 score :: Board -> Int
 score board =
-  let rows = zip board [0..3] in
+  let rows = zip board [1..4] in
   let rowScores = map rowScore rows in
   sum rowScores
 
