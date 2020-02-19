@@ -14,10 +14,8 @@ nthCol board col = map (!! col) board
 rot :: Board -> Board
 rot board = map (reverse . nthCol board) [0..3]
 
-slideRowRight :: Row -> Row
-slideRowRight [] = []
-slideRowRight (t : Empty : ts) =  Empty : slideRowRight (t : ts)
-slideRowRight (t : ts) = t : slideRowRight ts
+slideRowLeft :: Row -> Row
+slideRowLeft row = filter (/= Empty) row ++ filter (== Empty) row
 
 combineMatches :: Row -> Row
 combineMatches [] = []
@@ -27,7 +25,7 @@ combineMatches (Val x : Val y : ts) = if x == y
 combineMatches (t : ts) = t : combineMatches ts
 
 slideLeft :: Board -> Board
-slideLeft = map (combineMatches . slideRowRight)
+slideLeft = map (combineMatches . slideRowLeft)
 
 applyMove :: Move -> Board -> Board
 applyMove L = slideLeft
