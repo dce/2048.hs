@@ -14,13 +14,10 @@ nthCol board col = map (!! col) board
 rot :: Board -> Board
 rot board = map (reverse . nthCol board) [0..3]
 
-insertAfterEmpties :: Tile -> Row -> Row
-insertAfterEmpties t (Empty : ts) = Empty : insertAfterEmpties t ts
-insertAfterEmpties t ts = t : ts
-
-slideAcrossEmpties :: Row -> Row
-slideAcrossEmpties [] = []
-slideAcrossEmpties (t : ts) = insertAfterEmpties t (slideAcrossEmpties ts)
+slideRowRight :: Row -> Row
+slideRowRight [] = []
+slideRowRight (t : Empty : ts) =  Empty : slideRowRight (t : ts)
+slideRowRight (t : ts) = t : slideRowRight ts
 
 combineMatches :: Row -> Row
 combineMatches [] = []
@@ -29,14 +26,14 @@ combineMatches (Val x : Val y : ts) = if x == y
                                         else Val x : combineMatches (Val y : ts)
 combineMatches (t : ts) = t : combineMatches ts
 
-slideRight :: Board -> Board
-slideRight = map (reverse . combineMatches . reverse . slideAcrossEmpties)
+slideLeft :: Board -> Board
+slideLeft = map (combineMatches . slideRowRight)
 
 applyMove :: Move -> Board -> Board
-applyMove R = slideRight
-applyMove U = rot . slideRight . rot . rot . rot
-applyMove L = rot . rot . slideRight . rot . rot
-applyMove D = rot . rot . rot . slideRight . rot
+applyMove L = slideLeft
+applyMove D = rot . slideLeft . rot . rot . rot
+applyMove R = rot . rot . slideLeft . rot . rot
+applyMove U = rot . rot . rot . slideLeft . rot
 
 canMove :: Move -> Board -> Bool
 canMove move board = applyMove move board /= board
